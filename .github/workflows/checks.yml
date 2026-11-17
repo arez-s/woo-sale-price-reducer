@@ -1,0 +1,45 @@
+name: Plugin checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: local-test-only
+          MYSQL_DATABASE: wordpress_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -plocal-test-only"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, mbstring
+          tools: wp-cli
+      - name: Syntax checks
+        run: |
+          find . -name '*.php' -print0 | xargs -0 -n1 php -l
+          node --check assets/admin.js
+      - name: Install disposable WordPress and WooCommerce
+        run: |
+          wp core download --path=/tmp/wspr-wordpress
+          wp config create --path=/tmp/wspr-wordpress --dbname=wordpress_test --dbuser=root --dbpass=local-test-only --dbhost=127.0.0.1:3306
+          wp config set WP_ENVIRONMENT_TYPE local --path=/tmp/wspr-wordpress
+          wp core install --path=/tmp/wspr-wordpress --url=http://localhost:8098 --title=Tests --admin_user=plugin_tester --admin_password=local-test-only --admin_email=test@example.org --skip-email
+          wp plugin install woocommerce --activate --path=/tmp/wspr-wordpress
+          ln -s "$GITHUB_WORKSPACE" /tmp/wspr-wordpress/wp-content/plugins/woo-sale-price-reducer
+          wp plugin activate woo-sale-price-reducer --path=/tmp/wspr-wordpress
+      - name: Integration tests on MySQL
+        run: php tests/integration.php /tmp/wspr-wordpress
+      - name: Build installable ZIP
+        run: python3 build.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-plugin
+          path: dist/*.zip

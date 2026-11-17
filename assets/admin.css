@@ -1,0 +1,15 @@
+.wspr { max-width: 1400px; }
+.wspr-card { background: #fff; border: 1px solid #dcdcde; border-radius: 8px; padding: 22px; margin: 20px 0; }
+.wspr-fields { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.wspr-fields input { width: 140px; direction: ltr; text-align: center; }
+.wspr p { line-height: 1.9; }
+.wspr-scroll { overflow-x: auto; margin-bottom: 14px; }
+.wspr table { min-width: 820px; }
+.wspr table th, .wspr table td { text-align: right; vertical-align: middle; }
+.wspr .wspr-actions { min-width: 265px; }
+.wspr-actions .button { margin: 3px; }
+.wspr-count { display: inline-block; background: #fff; border: 1px solid #dcdcde; border-radius: 5px; padding: 3px 9px; margin: 3px; }
+.wspr progress { display: block; width: 100%; height: 24px; margin-top: 15px; accent-color: #2271b1; }
+.wspr [hidden] { display: none !important; }
+.wspr #wspr-error { padding: 14px; }
+.wspr-pagination { display: flex; gap: 12px; align-items: center; margin: 15px 0; }
